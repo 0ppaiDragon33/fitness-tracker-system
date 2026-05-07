@@ -8,7 +8,7 @@ cloudinary.config({
 });
 
 export const uploadToStorage = async (
-  file: Express.Multer.File,
+  file: any,
   folder = 'workouts'
 ): Promise<{ url: string; path: string }> => {
   return new Promise((resolve, reject) => {
