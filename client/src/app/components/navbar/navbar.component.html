@@ -1,0 +1,111 @@
+<!-- Mobile backdrop overlay -->
+<div *ngIf="mobileMenuOpen" 
+     (click)="closeMobileMenu()" 
+     class="fixed inset-0 bg-black/50 z-30 md:hidden transition-opacity duration-300">
+</div>
+
+<!-- Navigation Sidebar -->
+<nav [class]="'fixed left-0 top-0 h-screen bg-white/95 backdrop-blur-md border-r border-slate-200 z-40 transition-transform duration-300 flex flex-col shadow-lg ' + (mobileMenuOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0')
+     + ' w-64 md:w-72 lg:w-80'">
+  
+  <!-- Top Section: Logo -->
+  <div class="p-4 border-b border-slate-200">
+    <!-- Logo -->
+    <a routerLink="/" (click)="closeMobileMenu()" class="flex items-center gap-2 group flex-shrink-0">
+      <span class="text-2xl group-hover:scale-110 transition-transform duration-300">💪</span>
+      <span class="text-lg font-black text-transparent bg-gradient-to-r from-primary-600 to-primary-700 bg-clip-text tracking-tight">FitTrack</span>
+    </a>
+  </div>
+
+  <!-- Navigation Links -->
+  <div class="flex-1 overflow-y-auto py-6 px-3 space-y-1">
+    <!-- Exercises Link -->
+    <a routerLink="/exercises" 
+       [routerLinkActive]="'bg-primary-50 text-primary-600 font-semibold'"
+       (click)="closeMobileMenu()"
+       class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition text-sm font-medium">
+      <span class="text-lg">🏋️</span>
+      <span>Exercises</span>
+    </a>
+
+    <!-- Logged In: Workouts, Progress, Admin -->
+    <ng-container *ngIf="authService.isLoggedIn">
+      <a routerLink="/workouts" 
+         [routerLinkActive]="'bg-primary-50 text-primary-600 font-semibold'"
+         (click)="closeMobileMenu()"
+         class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition text-sm font-medium">
+        <span class="text-lg">📋</span>
+        <span>Workouts</span>
+      </a>
+      
+      <a routerLink="/progress" 
+         [routerLinkActive]="'bg-primary-50 text-primary-600 font-semibold'"
+         (click)="closeMobileMenu()"
+         class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition text-sm font-medium">
+        <span class="text-lg">📈</span>
+        <span>Progress</span>
+      </a>
+      
+      <a *ngIf="authService.isAdmin" 
+         routerLink="/admin" 
+         [routerLinkActive]="'bg-primary-50 text-primary-600 font-semibold'"
+         (click)="closeMobileMenu()"
+         class="flex items-center gap-3 px-4 py-3 text-slate-600 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition text-sm font-medium">
+        <span class="text-lg">🛡</span>
+        <span>Admin</span>
+      </a>
+    </ng-container>
+  </div>
+
+  <!-- Bottom Section: User Actions -->
+  <div class="border-t border-slate-200 p-3 space-y-2">
+    <!-- Guest Actions -->
+    <ng-container *ngIf="!authService.isLoggedIn">
+      <a routerLink="/login" 
+         (click)="closeMobileMenu()"
+         class="block px-4 py-2.5 text-center text-slate-600 hover:bg-slate-100 rounded-lg transition text-sm font-medium">
+        Login
+      </a>
+      <a routerLink="/register" 
+         (click)="closeMobileMenu()"
+         class="block px-4 py-2.5 text-center bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition text-sm font-medium">
+        Sign Up Free
+      </a>
+    </ng-container>
+
+    <!-- Logged In Actions -->
+    <div *ngIf="authService.isLoggedIn" class="space-y-2">
+      <a routerLink="/profile" 
+         [routerLinkActive]="'bg-primary-50 text-primary-600'"
+         (click)="closeMobileMenu()"
+         class="flex items-center justify-between px-4 py-2.5 text-slate-500 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition text-sm font-medium">
+        <span>👤 {{ authService.currentProfile?.name }}</span>
+        <span *ngIf="authService.isAdmin" class="badge badge-primary text-xs">Admin</span>
+      </a>
+      
+      <a routerLink="/workouts/log" 
+         (click)="closeMobileMenu()"
+         class="block px-4 py-2.5 text-center bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition text-sm font-medium">
+        + Log Workout
+      </a>
+      
+      <button (click)="logout(); closeMobileMenu()"
+              class="w-full px-4 py-2.5 text-red-500 hover:bg-red-50 rounded-lg transition text-sm font-medium text-left">
+        Logout
+      </button>
+    </div>
+  </div>
+</nav>
+
+<!-- Hamburger Button (Mobile only) - Positioned fixed on mobile -->
+<button
+  (click)="toggleMobileMenu()"
+  class="fixed left-4 top-4 md:hidden p-2 rounded-lg hover:bg-slate-100 transition text-slate-600 z-50 bg-white shadow-md border border-slate-200"
+  [attr.aria-label]="mobileMenuOpen ? 'Close menu' : 'Open menu'">
+  <svg *ngIf="!mobileMenuOpen" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+  </svg>
+  <svg *ngIf="mobileMenuOpen" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+  </svg>
+</button>

@@ -1,0 +1,277 @@
+<div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10">
+  <div class="card-elevated p-6 sm:p-8 animate-slideUp">
+    <div>
+      <h1 class="text-xl sm:text-2xl font-black text-slate-900 mb-1">{{ isEdit ? '✏️ Edit Workout' : '📋 Log a Workout' }}</h1>
+      <p class="text-slate-600 text-xs sm:text-sm mb-6 sm:mb-8">{{ isEdit ? 'Update your session details' : 'Record your training session' }}</p>
+    </div>
+
+    <div *ngIf="errorMsg" class="alert alert-error mb-5 text-xs sm:text-sm">
+      <span>⚠️</span><span>{{ errorMsg }}</span>
+    </div>
+    <div *ngIf="successMsg" class="alert alert-success mb-5 text-xs sm:text-sm">
+      <span>✓</span><span>{{ successMsg }}</span>
+    </div>
+
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-5 sm:space-y-6">
+
+      <!-- Title + Type -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
+        <div class="form-group">
+          <label class="form-label text-xs sm:text-sm">Workout Title *</label>
+          <input formControlName="title" placeholder="e.g. Morning Push Day" class="input-field text-xs sm:text-sm py-2 sm:py-3">
+          <p *ngIf="f['title'].touched && f['title'].invalid" class="form-error text-xs">
+            <span>✕</span> Title is required
+          </p>
+        </div>
+        <div class="form-group">
+          <label class="form-label text-xs sm:text-sm">Workout Type *</label>
+          <select formControlName="type" class="input-field text-xs sm:text-sm py-2 sm:py-3">
+            <option value="">Select type</option>
+            <option *ngFor="let t of workoutTypes" [value]="t">{{ t }}</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Date + Duration -->
+      <div class="grid grid-cols-2 gap-3 sm:gap-4">
+        <div class="form-group">
+          <label class="form-label text-xs sm:text-sm">Date *</label>
+          <input type="date" formControlName="date" class="input-field text-xs sm:text-sm py-2 sm:py-3">
+        </div>
+        <div class="form-group">
+          <label class="form-label text-xs sm:text-sm">Duration (min) *</label>
+          <input type="number" formControlName="durationMinutes" min="1" class="input-field text-xs sm:text-sm py-2 sm:py-3">
+        </div>
+      </div>
+
+      <!-- Biometrics row — affects calorie accuracy -->
+      <div class="rounded-xl border border-slate-200 p-4 sm:p-5 bg-slate-50">
+        <div class="flex items-start sm:items-center gap-2 mb-3 flex-wrap">
+          <span class="text-xs sm:text-sm font-bold text-slate-700">⚖️ Biometrics</span>
+          <span class="text-xs text-slate-500 font-medium">Improves calorie accuracy</span>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3 sm:gap-4">
+          <!-- Body weight -->
+          <div class="form-group">
+            <label class="form-label text-xs">Body Weight (kg)</label>
+            <input type="number" formControlName="bodyWeightKg" min="20" max="300" step="0.5"
+              placeholder="e.g. 75" class="input-field text-xs py-2">
+            <p class="text-slate-400 text-xs mt-1">Auto-saved</p>
+          </div>
+
+          <!-- Avg Heart Rate — unlocks Keytel formula -->
+          <div class="form-group">
+            <label class="form-label text-xs flex items-center gap-1 flex-wrap">
+              Avg HR
+              <span *ngIf="usingHRFormula"
+                class="text-xs text-green-700 bg-green-100 rounded-full px-2 py-0.5 font-bold">
+                ✓ Active
+              </span>
+            </label>
+            <input type="number" formControlName="avgHeartRate" min="40" max="220"
+              placeholder="e.g. 145 (opt)" class="input-field text-xs py-2">
+            <p class="text-slate-400 text-xs mt-1 hidden sm:block">
+              Keytel formula enabled
+            </p>
+          </div>
+        </div>
+
+        <!-- Missing biometrics hint -->
+        <div *ngIf="missingBiometrics.length > 0 && !usingHRFormula"
+          class="mt-3 text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 font-medium">
+          💡 Add <strong>{{ missingBiometrics.join(', ') }}</strong> to unlock HR formula.
+        </div>
+      </div>
+
+      <!-- Calories Burned (Smart) -->
+      <div class="rounded-xl border border-primary-200 p-4 sm:p-5 bg-primary-50">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-4">
+          <div class="flex items-center gap-2">
+            <label class="text-xs sm:text-sm font-semibold text-slate-700">🔥 Calories</label>
+            <!-- Formula badge -->
+            <span *ngIf="autoCalories && canEstimate"
+              class="text-xs font-bold px-2 py-0.5 rounded-full"
+              [class.bg-green-100]="usingHRFormula"
+              [class.text-green-700]="usingHRFormula"
+              [class.bg-blue-100]="!usingHRFormula"
+              [class.text-blue-700]="!usingHRFormula">
+              {{ usingHRFormula ? '❤️ HR formula' : '📊 MET formula' }}
+            </span>
+          </div>
+          <!-- Auto / Manual toggle -->
+          <div class="flex items-center gap-2">
+            <span class="text-xs text-slate-600 font-medium">{{ autoCalories ? 'Auto-estimated' : 'Manual' }}</span>
+            <button type="button" (click)="toggleAutoCalories()"
+              class="relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus:outline-none"
+              [class.bg-primary-600]="autoCalories"
+              [class.bg-slate-300]="!autoCalories">
+              <span class="inline-block h-3.5 w-3.5 transform rounded-full bg-white shadow transition-transform"
+                [class.translate-x-4]="autoCalories"
+                [class.translate-x-1]="!autoCalories"></span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Auto mode -->
+        <div *ngIf="autoCalories">
+          <div class="flex items-center gap-3 mb-2">
+            <div class="flex-1 bg-white border border-primary-200 rounded-xl px-4 py-3 text-sm font-bold text-primary-700 flex items-center gap-2">
+              <span class="text-2xl">{{ estimatedCalories }}</span>
+              <span class="text-primary-600 font-normal text-xs">kcal</span>
+              <span *ngIf="!canEstimate" class="text-slate-500 font-normal text-xs">(select type &amp; duration)</span>
+            </div>
+            <div class="text-xs text-slate-600 leading-snug max-w-[200px] font-medium">
+              <span *ngIf="canEstimate">{{ estimateLabel }}</span>
+            </div>
+          </div>
+          <p class="text-xs text-primary-700 bg-white rounded-lg px-3 py-2 font-medium">
+            ⚡ {{ usingHRFormula ? 'Keytel heart-rate formula (most accurate).' : 'MET-based estimate. Add avg heart rate + profile biometrics for better accuracy.' }}
+            Switch to <strong>Manual</strong> to enter your own.
+          </p>
+        </div>
+
+        <!-- Manual mode -->
+        <div *ngIf="!autoCalories">
+          <input type="number" formControlName="caloriesBurned" min="0"
+            placeholder="Enter calories burned" class="input-field mb-2">
+          <p class="text-xs text-primary-700 bg-white rounded-lg px-3 py-2 font-medium">
+            💡 Switch to <strong>Auto</strong> for smart estimation.
+          </p>
+        </div>
+      </div>
+
+      <!-- Notes -->
+      <div class="form-group">
+        <label class="form-label">Notes (optional)</label>
+        <textarea formControlName="notes" rows="2" placeholder="How did it go? Any PRs?"
+          class="input-field resize-none"></textarea>
+      </div>
+
+      <!-- Exercises -->
+      <div>
+        <div class="flex justify-between items-center mb-4">
+          <label class="text-sm font-semibold text-slate-700">Exercises Performed</label>
+          <button type="button" (click)="addExercise()"
+            class="text-xs text-primary-600 font-bold hover:text-primary-700 transition">
+            + Add Exercise
+          </button>
+        </div>
+
+        <div formArrayName="exercises" class="space-y-4">
+          <div *ngFor="let ctrl of exercisesArray.controls; let i = index" [formGroupName]="i"
+               class="card p-5 border-l-4 border-l-primary-600">
+
+            <div class="flex justify-between items-center mb-4">
+              <span class="text-sm font-bold text-slate-700">Exercise {{ i + 1 }}</span>
+              <button type="button" (click)="removeExercise(i)"
+                class="text-slate-400 hover:text-red-500 transition text-xs font-medium">
+                ✕ Remove
+              </button>
+            </div>
+
+            <!-- Exercise selector -->
+            <div class="mb-4">
+              <label class="text-xs text-slate-600 font-medium block mb-1">Exercise Name</label>
+              <select (change)="onExerciseSelect(i, $event)" class="input-field mb-2">
+                <option value="">-- Select from library --</option>
+                <option *ngFor="let ex of exercises" [value]="ex.name">
+                  {{ ex.name }} ({{ ex.muscleGroup }})
+                </option>
+              </select>
+              <input formControlName="exerciseName" placeholder="Or type custom exercise name"
+                class="input-field">
+            </div>
+
+            <!-- Type toggle -->
+            <div class="flex rounded-xl overflow-hidden border border-slate-200 mb-4 text-xs font-bold">
+              <button type="button"
+                [class.bg-primary-600]="getExType(i) === 'strength'"
+                [class.text-white]="getExType(i) === 'strength'"
+                [class.text-slate-600]="getExType(i) !== 'strength'"
+                [class.bg-slate-50]="getExType(i) !== 'strength'"
+                (click)="setExerciseType(i, 'strength')"
+                class="flex-1 py-2.5 transition text-center">🏋️ Strength</button>
+              <button type="button"
+                [class.bg-primary-600]="getExType(i) === 'cardio'"
+                [class.text-white]="getExType(i) === 'cardio'"
+                [class.text-slate-600]="getExType(i) !== 'cardio'"
+                [class.bg-slate-50]="getExType(i) !== 'cardio'"
+                (click)="setExerciseType(i, 'cardio')"
+                class="flex-1 py-2.5 transition text-center border-l border-slate-200">🏃 Cardio</button>
+            </div>
+
+            <!-- Strength fields -->
+            <ng-container *ngIf="getExType(i) === 'strength'">
+              <div class="grid grid-cols-2 gap-3">
+                <div class="form-group">
+                  <label class="text-xs text-slate-600 font-medium block mb-1">Sets</label>
+                  <input type="number" formControlName="sets" placeholder="e.g. 3" min="1" class="input-field">
+                </div>
+                <div class="form-group">
+                  <label class="text-xs text-slate-600 font-medium block mb-1">Reps</label>
+                  <input type="number" formControlName="reps" placeholder="e.g. 10" min="1" class="input-field">
+                </div>
+                <div class="form-group">
+                  <label class="text-xs text-slate-600 font-medium block mb-1">Weight (kg)</label>
+                  <input type="number" formControlName="weight" placeholder="e.g. 60" min="0" step="0.5" class="input-field">
+                </div>
+                <div class="form-group">
+                  <label class="text-xs text-slate-600 font-medium block mb-1">Rest Between Sets (sec)</label>
+                  <input type="number" formControlName="duration" placeholder="e.g. 90" min="0" class="input-field">
+                </div>
+              </div>
+            </ng-container>
+
+            <!-- Cardio fields -->
+            <ng-container *ngIf="getExType(i) === 'cardio'">
+              <div class="grid grid-cols-2 gap-3 mb-3">
+                <div class="form-group">
+                  <label class="text-xs text-slate-600 font-medium block mb-1">Distance (km)</label>
+                  <input type="number" formControlName="distance" placeholder="e.g. 5.0" min="0" step="0.1" class="input-field">
+                </div>
+                <div class="form-group">
+                  <label class="text-xs text-slate-600 font-medium block mb-1">Duration (min)</label>
+                  <input type="number" formControlName="duration" placeholder="e.g. 30" min="0" class="input-field">
+                </div>
+                <div class="form-group col-span-2">
+                  <label class="text-xs text-slate-600 font-medium block mb-1">Reps <span class="text-slate-400 font-normal">(optional — for jump rope, burpees, etc.)</span></label>
+                  <input type="number" formControlName="reps" placeholder="e.g. 100" min="0" class="input-field">
+                </div>
+              </div>
+              <div *ngIf="getPace(i)"
+                class="text-xs text-primary-700 bg-primary-100 rounded-lg px-3 py-2 font-semibold">
+                ⚡ Pace: {{ getPace(i) }} min/km
+              </div>
+            </ng-container>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- Photo upload -->
+      <div class="form-group">
+        <label class="form-label">Photo (optional)</label>
+        <div class="border-2 border-dashed border-slate-300 rounded-xl p-6 text-center hover:border-primary-400 hover:bg-primary-50 transition cursor-pointer"
+             (click)="fileInput.click()">
+          <input #fileInput type="file" accept="image/*" class="hidden" (change)="onFile($event)">
+          <div *ngIf="!previewUrl" class="py-4">
+            <p class="text-3xl mb-2">📷</p>
+            <p class="text-sm text-slate-500">Click to upload workout photo</p>
+          </div>
+          <img *ngIf="previewUrl" [src]="previewUrl"
+            class="max-h-48 mx-auto rounded-lg object-contain shadow-md">
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="flex gap-3 pt-4 border-t border-slate-200">
+        <button type="submit" [disabled]="loading" class="btn btn-primary btn-lg flex-1">
+          <span *ngIf="loading" class="spinner"></span>
+          {{ loading ? 'Saving...' : (isEdit ? '✓ Update Workout' : '✓ Log Workout') }}
+        </button>
+        <a routerLink="/workouts" class="btn btn-secondary btn-lg flex-1">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>

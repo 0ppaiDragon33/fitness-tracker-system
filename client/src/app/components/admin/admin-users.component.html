@@ -1,0 +1,54 @@
+<div class="max-w-6xl mx-auto px-4 py-10">
+  <div class="flex items-center gap-4 mb-8">
+    <a routerLink="/admin" class="text-primary-600 text-sm hover:underline">← Dashboard</a>
+    <h1 class="text-2xl font-black text-slate-900">Manage Users</h1>
+  </div>
+
+  <div *ngIf="loading" class="flex justify-center py-20">
+    <div class="w-8 h-8 border-4 border-primary-600 border-t-transparent rounded-full animate-spin"></div>
+  </div>
+
+  <div *ngIf="!loading" class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm">
+        <thead class="bg-slate-50 border-b border-slate-100">
+          <tr>
+            <th class="text-left px-6 py-4 font-semibold text-slate-500">Name</th>
+            <th class="text-left px-6 py-4 font-semibold text-slate-500">Email</th>
+            <th class="text-left px-6 py-4 font-semibold text-slate-500">Role</th>
+            <th class="text-left px-6 py-4 font-semibold text-slate-500">Joined</th>
+            <th class="text-right px-6 py-4 font-semibold text-slate-500">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-50">
+          <tr *ngFor="let u of users" class="hover:bg-slate-50 transition">
+            <td class="px-6 py-4 font-medium text-slate-900">{{ u.name }}</td>
+            <td class="px-6 py-4 text-slate-500">{{ u.email }}</td>
+            <td class="px-6 py-4">
+              <span [class]="u.role === 'admin' ? 'bg-purple-100 text-purple-700' : 'bg-slate-100 text-slate-600'"
+                    class="text-xs font-bold px-2 py-1 rounded-full uppercase">{{ u.role }}</span>
+            </td>
+            <td class="px-6 py-4 text-slate-400">{{ u.createdAt | date:'mediumDate' }}</td>
+            <td class="px-6 py-4 text-right space-x-3">
+              <button (click)="toggleRole(u)"
+                class="text-primary-600 text-xs font-semibold hover:underline">
+                {{ u.role === 'admin' ? 'Make User' : 'Make Admin' }}
+              </button>
+              <button (click)="deleteUser(u.uid)"
+                class="text-red-500 text-xs font-semibold hover:underline">Delete</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <div *ngIf="users.length === 0" class="text-center py-12 text-slate-400">No users found.</div>
+    </div>
+    <!-- Pagination -->
+    <div *ngIf="pagination && pagination.pages > 1" class="flex items-center justify-center gap-2 mt-6">
+      <button (click)="goTo(page - 1)" [disabled]="page <= 1"
+        class="px-3 py-1.5 text-sm font-semibold rounded-lg border border-slate-200 disabled:opacity-40 hover:bg-slate-50">← Prev</button>
+      <span class="text-sm text-slate-500">Page {{ page }} of {{ pagination.pages }}</span>
+      <button (click)="goTo(page + 1)" [disabled]="page >= pagination.pages"
+        class="px-3 py-1.5 text-sm font-semibold rounded-lg border border-slate-200 disabled:opacity-40 hover:bg-slate-50">Next →</button>
+    </div>
+  </div>
+</div>

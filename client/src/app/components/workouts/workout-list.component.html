@@ -1,0 +1,79 @@
+<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10">
+
+  <!-- Header -->
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 sm:mb-8">
+    <div>
+      <h1 class="text-2xl sm:text-3xl font-black text-slate-900">My Workouts</h1>
+      <p class="text-slate-500 mt-1 text-sm">{{ pagination?.total || 0 }} workouts logged</p>
+    </div>
+    <a routerLink="/workouts/log" class="btn btn-primary text-sm w-full sm:w-auto text-center">
+      + Log Workout
+    </a>
+  </div>
+
+  <!-- Filters -->
+  <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-4 sm:p-5 mb-6 sm:mb-8">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+      <select [(ngModel)]="filters.type" (change)="load()"
+        class="input-field text-sm">
+        <option value="">All Types</option>
+        <option *ngFor="let t of types" [value]="t">{{ t }}</option>
+      </select>
+      <input type="date" [(ngModel)]="filters.dateFrom" (change)="load()"
+        placeholder="From date" class="input-field text-sm">
+      <button (click)="clearFilters()"
+        class="btn btn-secondary text-sm w-full">
+        Clear Filters
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="flex justify-center py-20">
+    <div class="w-8 h-8 border-4 border-primary-600 border-t-transparent rounded-full animate-spin"></div>
+  </div>
+
+  <!-- Empty state -->
+  <div *ngIf="!loading && workouts.length === 0" class="text-center py-16 sm:py-20">
+    <p class="text-5xl mb-4">🏋️</p>
+    <p class="text-slate-500 text-lg font-medium mb-4">No workouts yet</p>
+    <a routerLink="/workouts/log" class="btn btn-primary">
+      Log your first workout
+    </a>
+  </div>
+
+  <!-- Workout cards -->
+  <div *ngIf="!loading && workouts.length > 0" class="space-y-3 sm:space-y-4">
+    <div *ngFor="let w of workouts"
+         class="bg-white rounded-2xl border border-slate-100 shadow-sm p-4 sm:p-5 hover:shadow-md hover:border-slate-200 transition-all duration-200">
+      <a [routerLink]="['/workouts', w.id]" class="flex gap-3 sm:gap-4 items-start">
+        <div class="w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-primary-50 flex items-center justify-center text-xl sm:text-2xl flex-shrink-0">
+          {{ getTypeEmoji(w.type) }}
+        </div>
+        <div class="flex-1 min-w-0">
+          <div class="flex items-start justify-between gap-2">
+            <h3 class="font-bold text-slate-900 truncate text-sm sm:text-base">{{ w.title }}</h3>
+            <span [class]="typeColors[w.type]" class="text-xs font-bold px-2 py-0.5 rounded-full whitespace-nowrap flex-shrink-0">
+              {{ w.type }}
+            </span>
+          </div>
+          <p class="text-slate-400 text-xs mt-1">📅 {{ w.date | date:'mediumDate' }}</p>
+          <div class="flex flex-wrap gap-3 mt-2">
+            <span class="text-xs text-slate-500">⏱ {{ w.durationMinutes }} min</span>
+            <span *ngIf="w.caloriesBurned" class="text-xs text-slate-500">🔥 {{ w.caloriesBurned }} kcal</span>
+            <span *ngIf="w.exercises.length" class="text-xs text-slate-500">🏋️ {{ w.exercises.length }} exercises</span>
+          </div>
+        </div>
+      </a>
+    </div>
+  </div>
+
+  <!-- Pagination -->
+  <div *ngIf="pagination && pagination.pages > 1" class="flex justify-center items-center gap-3 mt-8 sm:mt-10">
+    <button (click)="goTo(pagination.page - 1)" [disabled]="pagination.page === 1"
+      class="btn btn-secondary text-sm disabled:opacity-40">← Prev</button>
+    <span class="text-sm text-slate-500">Page {{ pagination.page }} of {{ pagination.pages }}</span>
+    <button (click)="goTo(pagination.page + 1)" [disabled]="pagination.page === pagination.pages"
+      class="btn btn-secondary text-sm disabled:opacity-40">Next →</button>
+  </div>
+</div>

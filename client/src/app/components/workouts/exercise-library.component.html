@@ -1,0 +1,237 @@
+<div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10">
+
+  <!-- Header -->
+  <div class="mb-6 sm:mb-8">
+    <h1 class="text-2xl sm:text-3xl font-black text-slate-900">Exercise Library</h1>
+    <p class="text-slate-500 text-xs sm:text-sm mt-1">
+      {{ exercises.length }} exercises · Click any card to see instructions
+    </p>
+  </div>
+
+  <!-- Filters -->
+  <div class="bg-white rounded-2xl border border-slate-100 shadow-sm p-4 sm:p-5 mb-6 sm:mb-8">
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+      <input type="text" [(ngModel)]="searchQuery" (ngModelChange)="onSearch($event)"
+        placeholder="🔍 Search exercises..."
+        class="input-field text-sm">
+      <select [(ngModel)]="filterDifficulty" (change)="load()"
+        class="input-field text-sm">
+        <option value="">All Difficulties</option>
+        <option *ngFor="let d of difficulties" [value]="d">{{ d }}</option>
+      </select>
+    </div>
+
+    <!-- Muscle group filter chips -->
+    <div class="flex gap-2 flex-wrap mt-3 sm:mt-4">
+      <button (click)="filterMuscle = ''; load()"
+        [class]="filterMuscle === '' ? 'bg-primary-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'"
+        class="text-xs font-semibold px-3 py-1.5 rounded-full transition">All</button>
+      <button *ngFor="let m of muscleGroups"
+        (click)="filterMuscle = m; load()"
+        [class]="filterMuscle === m ? 'bg-primary-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'"
+        class="text-xs font-semibold px-3 py-1.5 rounded-full transition">
+        {{ getMuscleEmoji(m) }} {{ m }}
+      </button>
+    </div>
+
+    <!-- Admin seed -->
+    <div *ngIf="authService.isAdmin" class="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center gap-2">
+      <button (click)="seed()" [disabled]="seeding"
+        class="btn btn-primary-ghost text-xs w-full sm:w-auto disabled:opacity-50">
+        {{ seeding ? 'Seeding...' : '🌱 Seed Exercise Library' }}
+      </button>
+      <p class="text-xs text-slate-400">Run once to populate library</p>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="flex justify-center py-20">
+    <div class="w-8 h-8 border-4 border-primary-600 border-t-transparent rounded-full animate-spin"></div>
+  </div>
+
+  <!-- Empty state -->
+  <div *ngIf="!loading && exercises.length === 0" class="text-center py-12 sm:py-20">
+    <p class="text-4xl sm:text-5xl mb-4">🏋️</p>
+    <p class="text-slate-500 text-base sm:text-lg font-medium">No exercises found</p>
+    <p *ngIf="authService.isAdmin" class="text-slate-400 text-xs sm:text-sm mt-2">
+      Use the "Seed Exercise Library" button above to populate.
+    </p>
+    <p *ngIf="!authService.isAdmin" class="text-slate-400 text-xs sm:text-sm mt-2">
+      Try different filters or ask an admin to seed the library.
+    </p>
+  </div>
+
+  <!-- Exercise groups -->
+  <div *ngIf="!loading && exercises.length > 0">
+    <div *ngFor="let group of groupedKeys()" class="mb-8 sm:mb-10">
+      <h2 class="text-base sm:text-lg font-black text-slate-800 mb-3 sm:mb-4 flex items-center gap-2">
+        <span class="text-xl sm:text-2xl">{{ getMuscleEmoji(group) }}</span>
+        <span class="truncate">{{ group }}</span>
+        <span class="text-xs sm:text-sm font-normal text-slate-400 flex-shrink-0">({{ grouped[group].length }})</span>
+      </h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
+        <div *ngFor="let ex of grouped[group]"
+             class="exercise-card group relative rounded-2xl overflow-hidden cursor-pointer
+                    border border-slate-100 bg-white
+                    shadow-sm hover:shadow-xl hover:-translate-y-1
+                    transition-all duration-300 flex flex-col"
+             [class.diff-beginner]="ex.difficulty === 'Beginner'"
+             [class.diff-intermediate]="ex.difficulty === 'Intermediate'"
+             [class.diff-advanced]="ex.difficulty === 'Advanced'"
+             (click)="openModal(ex)">
+
+          <!-- Colored top accent bar based on difficulty -->
+          <div class="h-1 w-full flex-shrink-0"
+               [class.bg-gradient-to-r]="true"
+               [class.from-emerald-400]="ex.difficulty === 'Beginner'"
+               [class.to-green-500]="ex.difficulty === 'Beginner'"
+               [class.from-amber-400]="ex.difficulty === 'Intermediate'"
+               [class.to-orange-500]="ex.difficulty === 'Intermediate'"
+               [class.from-red-500]="ex.difficulty === 'Advanced'"
+               [class.to-rose-600]="ex.difficulty === 'Advanced'">
+          </div>
+
+          <!-- Card body -->
+          <div class="flex-1 flex flex-col p-4 sm:p-5">
+
+            <!-- Title row -->
+            <div class="flex items-start justify-between mb-3 gap-2">
+              <h3 class="font-bold text-slate-900 text-sm sm:text-base group-hover:text-primary-600 transition-colors leading-snug flex-1">
+                {{ ex.name }}
+              </h3>
+              <span [class]="getDiffClass(ex.difficulty)"
+                    class="text-xs font-bold px-2.5 py-0.5 rounded-full flex-shrink-0 whitespace-nowrap">
+                {{ ex.difficulty }}
+              </span>
+            </div>
+
+            <!-- Type + Equipment -->
+            <div class="flex items-center gap-2 mb-3 flex-wrap">
+              <span [class]="getExTypeClass(ex.muscleGroup, ex.name)"
+                    class="inline-flex items-center gap-1 text-xs font-bold px-2.5 py-1 rounded-lg">
+                <span>{{ getExTypeEmoji(ex.muscleGroup, ex.name) }}</span>
+                <span>{{ getExType(ex.muscleGroup, ex.name) }}</span>
+              </span>
+              <span *ngIf="ex.equipment" class="inline-flex items-center gap-1 text-xs text-slate-500 bg-slate-50 px-2.5 py-1 rounded-lg border border-slate-100">
+                🏋️ {{ ex.equipment }}
+              </span>
+            </div>
+
+            <!-- Description -->
+            <p class="text-xs text-slate-500 leading-relaxed line-clamp-2 flex-1 mb-3">{{ ex.description }}</p>
+
+            <!-- Footer stats -->
+            <div class="flex items-center gap-2 pt-3 border-t border-slate-100 flex-wrap">
+              <span *ngIf="ex.instructions?.length"
+                class="inline-flex items-center gap-1 text-xs text-primary-600 bg-primary-50 px-2 py-0.5 rounded-md font-medium">
+                📋 {{ ex.instructions?.length }}
+              </span>
+              <span *ngIf="ex.tips?.length"
+                class="inline-flex items-center gap-1 text-xs text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md font-medium">
+                💡 {{ ex.tips?.length }}
+              </span>
+              <span *ngIf="ex.commonMistakes?.length"
+                class="inline-flex items-center gap-1 text-xs text-orange-600 bg-orange-50 px-2 py-0.5 rounded-md font-medium">
+                ⚠️ {{ ex.commonMistakes?.length }}
+              </span>
+              <span class="ml-auto text-xs text-slate-300 group-hover:text-primary-500 transition-colors font-semibold">
+                View →
+              </span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Exercise Detail Modal -->
+<div *ngIf="selectedExercise"
+  class="fixed inset-0 z-50 flex items-end sm:items-center justify-center px-0 sm:px-4"
+  (click)="closeModal()">
+  <div class="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
+  <div class="relative bg-white rounded-t-3xl sm:rounded-2xl w-full sm:max-w-lg max-h-[92vh] sm:max-h-[90vh] flex flex-col shadow-2xl"
+       (click)="$event.stopPropagation()">
+
+    <!-- Modal header -->
+    <div class="sticky top-0 bg-white rounded-t-3xl sm:rounded-t-2xl border-b border-slate-100 px-5 sm:px-6 py-4">
+      <div class="flex items-start justify-between gap-3">
+        <div class="min-w-0">
+          <h2 class="font-black text-slate-900 text-base sm:text-lg leading-tight">{{ selectedExercise.name }}</h2>
+          <div class="flex items-center flex-wrap gap-2 mt-1.5">
+            <span [class]="getExTypeClass(selectedExercise.muscleGroup, selectedExercise.name)"
+                  class="inline-flex items-center gap-1 text-xs font-bold px-2.5 py-1 rounded-lg">
+              <span>{{ getExTypeEmoji(selectedExercise.muscleGroup, selectedExercise.name) }}</span>
+              <span>{{ getExType(selectedExercise.muscleGroup, selectedExercise.name) }}</span>
+            </span>
+            <span class="text-xs text-slate-500">{{ getMuscleEmoji(selectedExercise.muscleGroup) }} {{ selectedExercise.muscleGroup }}</span>
+            <span [class]="getDiffClass(selectedExercise.difficulty)"
+              class="text-xs font-bold px-2 py-0.5 rounded-full">{{ selectedExercise.difficulty }}</span>
+            <span *ngIf="selectedExercise.equipment" class="text-xs text-slate-400">🏋️ {{ selectedExercise.equipment }}</span>
+          </div>
+        </div>
+        <button (click)="closeModal()"
+          class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 transition flex items-center justify-center text-slate-500 text-sm flex-shrink-0">✕</button>
+      </div>
+    </div>
+
+    <!-- Modal body -->
+    <div class="px-5 sm:px-6 py-5 space-y-6 overflow-y-auto flex-1">
+      <p class="text-slate-600 text-sm leading-relaxed">{{ selectedExercise.description }}</p>
+
+      <div *ngIf="selectedExercise.instructions?.length">
+        <h3 class="font-black text-slate-900 mb-3 flex items-center gap-2 text-sm">
+          <span class="w-6 h-6 rounded-full bg-primary-100 text-primary-700 text-xs flex items-center justify-center">📋</span>
+          How to Perform
+        </h3>
+        <ol class="space-y-3">
+          <li *ngFor="let step of selectedExercise.instructions; let i = index" class="flex gap-3">
+            <span class="w-6 h-6 rounded-full bg-primary-600 text-white text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">
+              {{ i + 1 }}
+            </span>
+            <p class="text-sm text-slate-700 leading-relaxed">{{ step }}</p>
+          </li>
+        </ol>
+      </div>
+
+      <div *ngIf="selectedExercise.tips?.length">
+        <h3 class="font-black text-slate-900 mb-3 flex items-center gap-2 text-sm">
+          <span class="w-6 h-6 rounded-full bg-blue-100 text-blue-600 text-xs flex items-center justify-center">💡</span>
+          Pro Tips
+        </h3>
+        <ul class="space-y-2">
+          <li *ngFor="let tip of selectedExercise.tips"
+              class="flex gap-2 text-sm text-slate-700 bg-blue-50 rounded-xl px-4 py-2.5">
+            <span class="text-blue-500 flex-shrink-0 mt-0.5">→</span>
+            {{ tip }}
+          </li>
+        </ul>
+      </div>
+
+      <div *ngIf="selectedExercise.commonMistakes?.length">
+        <h3 class="font-black text-slate-900 mb-3 flex items-center gap-2 text-sm">
+          <span class="w-6 h-6 rounded-full bg-orange-100 text-orange-600 text-xs flex items-center justify-center">⚠️</span>
+          Common Mistakes
+        </h3>
+        <ul class="space-y-2">
+          <li *ngFor="let mistake of selectedExercise.commonMistakes"
+              class="flex gap-2 text-sm text-slate-700 bg-orange-50 rounded-xl px-4 py-2.5">
+            <span class="text-orange-500 flex-shrink-0 mt-0.5">✕</span>
+            {{ mistake }}
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Modal footer -->
+    <div class="sticky bottom-0 bg-white rounded-b-2xl border-t border-slate-100 px-5 sm:px-6 py-4 flex gap-3">
+      <button (click)="startSession(selectedExercise!)" class="btn btn-primary flex-1 text-sm py-2.5">
+        ▶ Start Session
+      </button>
+      <button (click)="closeModal()" class="btn btn-secondary flex-1 text-sm py-2.5">
+        Close
+      </button>
+    </div>
+  </div>
+</div>

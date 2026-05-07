@@ -1,0 +1,69 @@
+<div class="max-w-7xl mx-auto px-4 py-10">
+  <div class="flex items-center gap-4 mb-8">
+    <a routerLink="/admin" class="text-primary-600 text-sm hover:underline">← Dashboard</a>
+    <h1 class="text-2xl font-black text-slate-900">All Workouts</h1>
+  </div>
+
+  <div class="flex gap-4 mb-6 flex-wrap">
+    <select [(ngModel)]="filterType" (change)="load()"
+      class="border border-slate-200 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-400">
+      <option value="">All Types</option>
+      <option *ngFor="let t of types" [value]="t">{{ t }}</option>
+    </select>
+  </div>
+
+  <div *ngIf="loading" class="flex justify-center py-20">
+    <div class="w-8 h-8 border-4 border-primary-600 border-t-transparent rounded-full animate-spin"></div>
+  </div>
+
+  <div *ngIf="!loading" class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm">
+        <thead class="bg-slate-50 border-b border-slate-100">
+          <tr>
+            <th class="text-left px-5 py-4 font-semibold text-slate-500">Workout</th>
+            <th class="text-left px-5 py-4 font-semibold text-slate-500">Type</th>
+            <th class="text-left px-5 py-4 font-semibold text-slate-500">User</th>
+            <th class="text-left px-5 py-4 font-semibold text-slate-500">Date</th>
+            <th class="text-left px-5 py-4 font-semibold text-slate-500">Duration</th>
+            <th class="text-left px-5 py-4 font-semibold text-slate-500">Calories</th>
+            <th class="text-right px-5 py-4 font-semibold text-slate-500">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-50">
+          <tr *ngFor="let w of workouts" class="hover:bg-slate-50 transition">
+            <td class="px-5 py-4">
+              <a [routerLink]="['/workouts', w.id]"
+                 class="font-medium text-slate-900 hover:text-primary-600 truncate block max-w-xs">
+                {{ w.title }}
+              </a>
+              <p class="text-slate-400 text-xs">{{ w.exercises?.length || 0 }} exercises</p>
+            </td>
+            <td class="px-5 py-4">
+              <span [class]="typeColors[w.type]"
+                    class="text-xs font-bold px-2 py-1 rounded-full">{{ w.type }}</span>
+            </td>
+            <td class="px-5 py-4 text-slate-500">{{ w.userName }}</td>
+            <td class="px-5 py-4 text-slate-500">{{ w.date | date:'shortDate' }}</td>
+            <td class="px-5 py-4 text-slate-600 font-medium">{{ w.durationMinutes }} min</td>
+            <td class="px-5 py-4 text-slate-600">{{ w.caloriesBurned || 0 }} kcal</td>
+            <td class="px-5 py-4 text-right">
+              <button (click)="del(w.id)"
+                class="text-red-500 text-xs font-semibold hover:underline">Delete</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <div *ngIf="workouts.length === 0" class="text-center py-12 text-slate-400">No workouts found.</div>
+    </div>
+  </div>
+
+  <!-- Pagination -->
+  <div *ngIf="pagination && pagination.pages > 1" class="flex justify-center gap-3 mt-8">
+    <button (click)="goTo(pagination.page - 1)" [disabled]="pagination.page === 1"
+      class="px-4 py-2 rounded-xl border text-sm disabled:opacity-40 hover:bg-slate-50 transition">← Prev</button>
+    <span class="px-4 py-2 text-sm text-slate-500">{{ pagination.page }} / {{ pagination.pages }}</span>
+    <button (click)="goTo(pagination.page + 1)" [disabled]="pagination.page === pagination.pages"
+      class="px-4 py-2 rounded-xl border text-sm disabled:opacity-40 hover:bg-slate-50 transition">Next →</button>
+  </div>
+</div>
