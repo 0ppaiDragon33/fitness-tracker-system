@@ -158,7 +158,6 @@ export const EXERCISE_MET: Record<string, number> = {
 
   // ── Full Body ────────────────────────────────────────────────────────────
   'Farmers Carry':        5.0,
-  'Battle Ropes':        10.0,
 
   // ── Flexibility / Mobility ───────────────────────────────────────────────
   'Stretching':           2.3,
