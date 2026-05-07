@@ -1,6 +1,6 @@
 <div class="flex h-screen">
-  <app-navbar></app-navbar>
-  <main class="flex-1 overflow-y-auto bg-gradient-to-b from-white via-slate-50 to-white md:ml-72 lg:ml-80 transition-all duration-300 pt-16 md:pt-0">
+  <app-navbar *ngIf="showNavbar"></app-navbar>
+  <main [class]="'flex-1 overflow-y-auto bg-gradient-to-b from-white via-slate-50 to-white transition-all duration-300 ' + (showNavbar ? 'md:ml-72 lg:ml-80 pt-16 md:pt-0' : '')">
     <router-outlet></router-outlet>
   </main>
 </div>
