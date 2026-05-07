@@ -1,6 +1,6 @@
 export const environment = {
   production: true,
-  apiUrl: 'https://fittrack-api.onrender.com/api',
+  apiUrl: 'https://fittrack-api-o2xq.onrender.com/api',
   firebase: {
     apiKey: 'AIzaSyC3f7IzdcjnBseYD-iPZKLdpklCkL_IZ3s',
     authDomain: 'fittrack-app-1c7ea.firebaseapp.com',

@@ -99,13 +99,11 @@
 
 <!-- Hamburger Button (Mobile only) - Positioned fixed on mobile -->
 <button
+  *ngIf="!mobileMenuOpen"
   (click)="toggleMobileMenu()"
   class="fixed left-4 top-4 md:hidden p-2 rounded-lg hover:bg-slate-100 transition text-slate-600 z-50 bg-white shadow-md border border-slate-200"
-  [attr.aria-label]="mobileMenuOpen ? 'Close menu' : 'Open menu'">
-  <svg *ngIf="!mobileMenuOpen" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+  [attr.aria-label]="'Open menu'">
+  <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-  </svg>
-  <svg *ngIf="mobileMenuOpen" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
   </svg>
 </button>

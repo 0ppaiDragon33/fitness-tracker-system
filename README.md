@@ -130,6 +130,6 @@ fitness-tracker/
 
 | Name | Role |
 |---|---|
-| Karl Joshua Vargas | Frontend Developer |
-| Queenie Parcia | Backend Developer |
+| Karl Joshua Vargas | Backend Developer |
+| Queenie Parcia | Frontend Developer  |
 | Donna Mae Batacandolo | UI/UX + Documentation |
