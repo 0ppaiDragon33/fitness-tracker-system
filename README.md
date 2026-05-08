@@ -135,7 +135,6 @@ fitness-tracker-system/
 ├── .env.example          → Environment variable template
 ├── firebase.json         → Firebase Hosting config
 ├── firestore.rules       → Firestore security rules
-├── storage.rules         → Firebase Storage rules
 └── .gitignore
 ```
 
