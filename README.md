@@ -107,7 +107,7 @@ The frontend will run on `http://localhost:4200` and the backend on `http://loca
 - **Progress Tracking** — Charts displaying workouts per week, calories burned, and personal records
 - **Body Measurements** — Log and track weight, BMI, and body fat percentage over time
 - **Search, Filter & Pagination** — Filter workouts by type, date range, and muscle group with pagination support
-- **File Upload** — Upload workout and profile photos via Cloudinary / Firebase Storage
+- **File Upload** — Upload workout photos via Cloudinary
 - **Admin Dashboard** — Manage users, view all workouts, and monitor platform statistics
 - **JWT Authentication** — Firebase ID token verification on all protected routes
 - **Input Validation & Sanitization** — Backend validation middleware on all endpoints
