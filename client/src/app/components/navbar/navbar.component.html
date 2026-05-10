@@ -8,17 +8,25 @@
 <nav [class]="'fixed left-0 top-0 h-screen bg-white/95 backdrop-blur-md border-r border-slate-200 z-40 transition-transform duration-300 flex flex-col shadow-lg ' + (mobileMenuOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0')
      + ' w-64 md:w-72 lg:w-80'">
   
-  <!-- Top Section: Logo -->
-  <div class="p-4 border-b border-slate-200">
+  <!-- Top Section: Logo + Close Button on Mobile -->
+  <div class="flex items-center justify-between p-4 border-b border-slate-200">
     <!-- Logo -->
     <a routerLink="/" (click)="closeMobileMenu()" class="flex items-center gap-2 group flex-shrink-0">
       <span class="text-2xl group-hover:scale-110 transition-transform duration-300">💪</span>
       <span class="text-lg font-black text-transparent bg-gradient-to-r from-primary-600 to-primary-700 bg-clip-text tracking-tight">FitTrack</span>
     </a>
+    <!-- Close Button (Mobile only) -->
+    <button (click)="closeMobileMenu()" 
+            class="md:hidden p-2 rounded-lg hover:bg-slate-100 transition text-slate-600"
+            [attr.aria-label]="'Close menu'">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+      </svg>
+    </button>
   </div>
 
   <!-- Navigation Links -->
-  <div class="flex-1 overflow-y-auto py-6 px-3 space-y-1">
+  <div class="flex-1 overflow-y-auto py-6 px-3 space-y-1 pb-24 md:pb-6">
     <!-- Exercises Link -->
     <a routerLink="/exercises" 
        [routerLinkActive]="'bg-primary-50 text-primary-600 font-semibold'"
@@ -57,8 +65,8 @@
     </ng-container>
   </div>
 
-  <!-- Bottom Section: User Actions -->
-  <div class="border-t border-slate-200 p-3 space-y-2">
+  <!-- Bottom Section: User Actions (Sticky on Mobile) -->
+  <div class="border-t border-slate-200 p-3 space-y-2 sticky bottom-0 bg-white/95 backdrop-blur-md">
     <!-- Guest Actions -->
     <ng-container *ngIf="!authService.isLoggedIn">
       <a routerLink="/login" 
