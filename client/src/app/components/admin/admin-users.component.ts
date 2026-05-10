@@ -39,10 +39,22 @@ export class AdminUsersComponent implements OnInit {
     });
   }
 
-  deleteUser(uid: string): void {
-    if (!confirm('Delete this user? This cannot be undone.')) return;
-    this.adminService.deleteUser(uid).subscribe({
-      next: () => { this.users = this.users.filter(u => u.uid !== uid); },
-    });
-  }
+ showDeleteModal = false;
+selectedUid = '';
+
+deleteUser(uid: string): void {
+  this.selectedUid = uid;
+  this.showDeleteModal = true;
+}
+
+confirmDeleteUser(): void {
+  this.adminService.deleteUser(this.selectedUid).subscribe({
+    next: () => {
+      this.users = this.users.filter(u => u.uid !== this.selectedUid);
+      this.showDeleteModal = false;
+      this.selectedUid = '';
+    },
+  });
+}
+  
 }

@@ -48,8 +48,8 @@
             <td class="px-5 py-4 text-slate-600 font-medium">{{ w.durationMinutes }} min</td>
             <td class="px-5 py-4 text-slate-600">{{ w.caloriesBurned || 0 }} kcal</td>
             <td class="px-5 py-4 text-right">
-              <button (click)="del(w.id)"
-                class="text-red-500 text-xs font-semibold hover:underline">Delete</button>
+              <button (click)="selectedId = w.id; showDeleteModal = true"
+                   class="text-red-500 text-xs font-semibold hover:underline">Delete</button>
             </td>
           </tr>
         </tbody>
@@ -66,4 +66,22 @@
     <button (click)="goTo(pagination.page + 1)" [disabled]="pagination.page === pagination.pages"
       class="px-4 py-2 rounded-xl border text-sm disabled:opacity-40 hover:bg-slate-50 transition">Next →</button>
   </div>
+    <!-- Delete Workout Modal -->
+<div *ngIf="showDeleteModal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+  <div class="bg-white rounded-2xl shadow-xl p-6 w-full max-w-sm">
+    <div class="text-center mb-4">
+      <span class="text-4xl">🗑️</span>
+      <h3 class="text-lg font-black text-slate-900 mt-2">Delete Workout?</h3>
+      <p class="text-slate-500 text-sm mt-1">This action cannot be undone.</p>
+    </div>
+    <div class="flex gap-3 mt-6">
+      <button (click)="showDeleteModal = false; selectedId = ''" class="flex-1 px-4 py-2.5 rounded-xl border border-slate-200 text-slate-600 font-semibold text-sm hover:bg-slate-50 transition">
+        Cancel
+      </button>
+      <button (click)="confirmDelete()" class="flex-1 px-4 py-2.5 rounded-xl bg-red-500 text-white font-semibold text-sm hover:bg-red-600 transition">
+        Delete
+      </button>
+    </div>
+  </div>
+</div>
 </div>

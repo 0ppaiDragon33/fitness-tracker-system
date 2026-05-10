@@ -39,8 +39,12 @@ export class ProgressComponent implements OnInit {
   logBody(): void {
     const val = this.bodyForm.value;
     if (!val.weight && !val.bodyFat) return;
+    const payload: any = {};
+    if (val.weight) payload.weight = Number(val.weight);
+    if (val.bodyFat) payload.bodyFat = Number(val.bodyFat);
+    if (val.notes) payload.notes = val.notes;
     this.loggingBody = true;
-    this.progressService.logBody(val).subscribe({
+    this.progressService.logBody(payload).subscribe({
       next: res => {
         this.bodyLogs.unshift(res.data.log);
         this.bodyForm.reset();

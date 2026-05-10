@@ -35,12 +35,23 @@ export class AdminWorkoutsComponent implements OnInit {
     });
   }
 
-  del(id: string): void {
-    if (!confirm('Delete this workout?')) return;
-    this.workoutService.deleteWorkout(id).subscribe({
-      next: () => { this.workouts = this.workouts.filter(w => w.id !== id); },
-    });
-  }
+  showDeleteModal = false;
+selectedId = '';
+
+del(id: string): void {
+  this.selectedId = id;
+  this.showDeleteModal = true;
+}
+
+confirmDelete(): void {
+  this.workoutService.deleteWorkout(this.selectedId).subscribe({
+    next: () => {
+      this.workouts = this.workouts.filter(w => w.id !== this.selectedId);
+      this.showDeleteModal = false;
+      this.selectedId = '';
+    },
+  });
+}
 
   goTo(p: number): void { this.page = p; this.load(); }
 }

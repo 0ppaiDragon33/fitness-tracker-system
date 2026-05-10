@@ -44,10 +44,15 @@ export class WorkoutDetailComponent implements OnInit {
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   }
 
-  deleteWorkout(): void {
-    if (!confirm('Delete this workout?')) return;
-    this.workoutService.deleteWorkout(this.workout!.id).subscribe({
-      next: () => this.router.navigate(['/workouts']),
-    });
-  }
+  showDeleteModal = false;
+
+deleteWorkout(): void {
+  this.showDeleteModal = true;
+}
+
+confirmDelete(): void {
+  this.workoutService.deleteWorkout(this.workout!.id).subscribe({
+    next: () => this.router.navigate(['/workouts']),
+  });
+}
 }

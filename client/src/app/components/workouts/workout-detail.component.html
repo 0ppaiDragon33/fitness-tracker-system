@@ -44,17 +44,34 @@
           💬 {{ workout.notes }}
         </p>
 
-        <!-- Actions -->
+       <!-- Actions -->
         <div *ngIf="canEdit" class="flex gap-3">
           <a [routerLink]="['/workouts', workout.id, 'edit']" class="btn btn-primary text-sm flex-1 sm:flex-none sm:px-6">
             ✏️ Edit
           </a>
-          <button (click)="deleteWorkout()" class="btn btn-danger text-sm flex-1 sm:flex-none sm:px-6">
+          <button (click)="showDeleteModal = true" class="btn btn-danger text-sm flex-1 sm:flex-none sm:px-6">
             🗑 Delete
           </button>
         </div>
-      </div>
-    </div>
+
+        <!-- Delete Modal -->
+        <div *ngIf="showDeleteModal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div class="bg-white rounded-2xl shadow-xl p-6 w-full max-w-sm">
+            <div class="text-center mb-4">
+              <span class="text-4xl">🗑️</span>
+              <h3 class="text-lg font-black text-slate-900 mt-2">Delete Workout?</h3>
+              <p class="text-slate-500 text-sm mt-1">This action cannot be undone.</p>
+            </div>
+            <div class="flex gap-3 mt-6">
+              <button (click)="showDeleteModal = false" class="flex-1 px-4 py-2.5 rounded-xl border border-slate-200 text-slate-600 font-semibold text-sm hover:bg-slate-50 transition">
+                Cancel
+              </button>
+              <button (click)="confirmDelete()" class="flex-1 px-4 py-2.5 rounded-xl bg-red-500 text-white font-semibold text-sm hover:bg-red-600 transition">
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
 
     <!-- Exercise log -->
     <div *ngIf="workout.exercises?.length" class="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 sm:p-6">

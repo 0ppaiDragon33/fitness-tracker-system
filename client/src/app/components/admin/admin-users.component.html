@@ -34,8 +34,8 @@
                 class="text-primary-600 text-xs font-semibold hover:underline">
                 {{ u.role === 'admin' ? 'Make User' : 'Make Admin' }}
               </button>
-              <button (click)="deleteUser(u.uid)"
-                class="text-red-500 text-xs font-semibold hover:underline">Delete</button>
+              <button (click)="selectedUid = u.uid; showDeleteModal = true"
+                 class="text-red-500 text-xs font-semibold hover:underline">Delete</button>
             </td>
           </tr>
         </tbody>
@@ -51,4 +51,22 @@
         class="px-3 py-1.5 text-sm font-semibold rounded-lg border border-slate-200 disabled:opacity-40 hover:bg-slate-50">Next →</button>
     </div>
   </div>
+      <!-- Delete User Modal -->
+<div *ngIf="showDeleteModal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+  <div class="bg-white rounded-2xl shadow-xl p-6 w-full max-w-sm">
+    <div class="text-center mb-4">
+      <span class="text-4xl">⚠️</span>
+      <h3 class="text-lg font-black text-slate-900 mt-2">Delete User?</h3>
+      <p class="text-slate-500 text-sm mt-1">This cannot be undone. All user data will be removed.</p>
+    </div>
+    <div class="flex gap-3 mt-6">
+      <button (click)="showDeleteModal = false; selectedUid = ''" class="flex-1 px-4 py-2.5 rounded-xl border border-slate-200 text-slate-600 font-semibold text-sm hover:bg-slate-50 transition">
+        Cancel
+      </button>
+      <button (click)="confirmDeleteUser()" class="flex-1 px-4 py-2.5 rounded-xl bg-red-500 text-white font-semibold text-sm hover:bg-red-600 transition">
+        Delete
+      </button>
+    </div>
+  </div>
+</div>
 </div>
