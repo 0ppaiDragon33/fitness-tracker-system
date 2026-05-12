@@ -120,7 +120,28 @@ The frontend will run on `http://localhost:4200` and the backend on `http://loca
 
 ## 📸 Screenshots
 
-See the `/screenshots` folder for UI screenshots and API testing results.
+All screenshots are located in the `/screenshots` folder.
+
+### 🖥️ UI Screenshots
+
+| Screenshot | Description |
+|---|---|
+| `Login page.png` | User login page with email and password |
+| `Register page.png` | User registration form |
+| `Workout list .png` | Main workout list with search, filter, and pagination |
+| `Workout Form.png` | Add / edit workout form with exercises |
+| `Progress Chart.png` | Progress tracking page with charts |
+| `Execise List.png` | Exercise library with search and filter |
+| `Profile.png` | User profile page |
+| `Admin Dashboard.png` | Admin dashboard with platform statistics |
+
+### 🔌 API Testing (Swagger)
+
+| Screenshot | Description |
+|---|---|
+| `swagger endpoints.png` | Full list of all API endpoints in Swagger UI |
+| `swag resp. 1.png` | API test — GET /exercises returning 200 response |
+| `swag resp. 2.png` | API test — POST /auth/register showing request body |
 
 ---
 
